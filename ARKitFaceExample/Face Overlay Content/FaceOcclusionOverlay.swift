@@ -34,15 +34,22 @@ class FaceOcclusionOverlay: NSObject, VirtualContentController {
         occlusionNode.renderingOrder = -1
 
         // Add 3D asset positioned to appear as "glasses".
-        let faceOverlayContent = SCNReferenceNode(named: "overlayModel")
-        
-        // Assign a random color to the text.
-        let material = SCNMaterial.materialWithColor(anchor.identifier.toRandomColor())
-        faceOverlayContent.childNode(withName: "text", recursively: true)?.geometry?.materials = [material]
+        guard let usdcURL = Bundle.main.url(forResource: "textured_ape", withExtension: "usdz") else { fatalError() }
+        let faceOverlayContent = SCNReferenceNode(url: usdcURL)
+        faceOverlayContent?.load()
 
+        // Adjust the rotation to make the model face the front
+        // Currently loads from the top
+        // Thanks ChatGPT
+        faceOverlayContent?.eulerAngles.x = -.pi / 2 // Rotate around the X-axis
+
+        // Reduce the size by 50%
+        let scale = SCNVector3(0.5, 0.5, 0.5)
+        faceOverlayContent?.scale = scale
+        
         contentNode = SCNNode()
         contentNode!.addChildNode(occlusionNode)
-        contentNode!.addChildNode(faceOverlayContent)
+        contentNode!.addChildNode(faceOverlayContent!)
         #endif
         return contentNode
     }
